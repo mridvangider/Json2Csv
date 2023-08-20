@@ -4,12 +4,22 @@ using System.Text;
 
 namespace Json2Csv6
 {
-    internal class Program
+    public class Program
     {
         public static string GetCsvLine(JObject jsonObject)
         {
             string[] values = jsonObject.Properties()
-                .Select(prop => prop.Type == JTokenType.String ? "\"" + prop.Value.ToString() + "\"" : prop.Value.ToString())
+                .Select(prop =>
+                {
+                    if (prop.Value.Type == JTokenType.String )
+                        return "\"" + prop.Value.ToString() + "\"";
+
+                    else if (prop.Value.Type == JTokenType.Float )
+                        return prop.Value.ToString().Replace(',', '.');
+
+                    else
+                        return prop.Value.ToString();
+                })
                 .ToArray();
             return string.Join(',', values);
         }
@@ -19,12 +29,12 @@ namespace Json2Csv6
             return string.Join(',', jsonObject.Properties().Select(prop => "\"" + prop.Name + "\""));
         }
 
-        public static void Convert(StreamReader reader, StreamWriter writer)
+        public static void Convert(TextReader reader, TextWriter writer)
         {
-            foreach (JObject obj in JArray.Load(new JsonTextReader(reader)))
-            {
-                writer.WriteLine(GetCsvLine(obj));
-            }
+            var arr = JArray.Load(new JsonTextReader(reader)).Cast<JObject>().ToList();
+            var header = GetCsvHeader(arr[0]);
+            writer.WriteLine(header);
+            arr.ForEach(obj => writer.WriteLine(GetCsvLine(obj)));
         }
 
         static void Main(string[] args)
