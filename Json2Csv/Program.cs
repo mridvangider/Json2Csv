@@ -9,6 +9,7 @@ namespace Json2Csv6
         public static string GetCsvLine(JObject jsonObject)
         {
             string[] values = jsonObject.Properties()
+                .Where(prop => prop.Value.Type != JTokenType.Object && prop.Value.Type != JTokenType.Array)
                 .Select(prop =>
                 {
                     if (prop.Value.Type == JTokenType.String )
