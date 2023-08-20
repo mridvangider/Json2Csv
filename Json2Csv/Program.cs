@@ -14,6 +14,11 @@ namespace Json2Csv6
             return string.Join(',', values);
         }
 
+        public static string GetCsvHeader(JObject jsonObject)
+        {
+            return string.Join(',', jsonObject.Properties().Select(prop => "\"" + prop.Name + "\""));
+        }
+
         public static void Convert(StreamReader reader, StreamWriter writer)
         {
             foreach (JObject obj in JArray.Load(new JsonTextReader(reader)))
